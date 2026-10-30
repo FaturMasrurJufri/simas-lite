@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transparansi Kas & Kegiatan Masjid</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="header-left">
+        <div class="title-row">
+          <h1 id="masjid-name">Memuat nama masjid...</h1>
+          <button id="btn-edit-masjid" class="btn-icon" title="Edit Identitas Masjid" aria-label="Edit Profil Masjid">
+            ✏️
+          </button>
+        </div>
+        <p id="masjid-address" class="text-muted">Memuat data alamat...</p>
+      </div>
+      <div class="period-badge" id="masjid-period">Periode: -</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="summary-grid">
+      <article class="card card-summary">
+        <span class="card-label">Total Pemasukan</span>
+        <h2 class="card-value text-success" id="total-masuk">Rp 0</h2>
+      </article>
+      <article class="card card-summary">
+        <span class="card-label">Total Pengeluaran</span>
+        <h2 class="card-value text-danger" id="total-keluar">Rp 0</h2>
+      </article>
+      <article class="card card-summary">
+        <span class="card-label">Saldo Berjalan</span>
+        <h2 class="card-value text-primary" id="saldo-akhir">Rp 0</h2>
+      </article>
+    </section>
+
+    <section class="content-section">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="search-input">Cari Transaksi:</label>
+          <input type="text" id="search-input" placeholder="Contoh: Listrik, Kotak Jumat...">
+        </div>
+        <div class="filter-group">
+          <label for="filter-type">Tipe Transaksi:</label>
+          <select id="filter-type">
+            <option value="all">Semua Tipe</option>
+            <option value="masuk">Pemasukan</option>
+            <option value="keluar">Pengeluaran</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-category">Kategori:</label>
+          <select id="filter-category">
+            <option value="all">Semua Kategori</option>
+            <option value="infaq">Infaq / Sedekah</option>
+            <option value="operasional">Operasional</option>
+            <option value="renovasi">Renovasi / Fisik</option>
+            <option value="sosial">Sosial / Yatim</option>
+            <option value="dakwah">Dakwah & Kajian</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tanggal</th>
+              <th>Deskripsi</th>
+              <th>Kategori</th>
+              <th>Tipe</th>
+              <th class="text-right">Nominal</th>
+            </tr>
+          </thead>
+          <tbody id="transaction-list">
+            <tr>
+              <td colspan="6" class="text-center">Memuat data transaksi...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="empty-state" class="empty-state" style="display: none;">
+        Data transaksi tidak ditemukan.
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Edit Identitas Masjid -->
+  <dialog id="modal-edit-masjid" class="modal">
+    <div class="modal-card">
+      <h3 class="modal-title">Ubah Identitas Masjid</h3>
+      <form id="form-edit-masjid" method="dialog">
+        <div class="form-group">
+          <label for="input-masjid-name">Nama Masjid:</label>
+          <input type="text" id="input-masjid-name" required placeholder="Contoh: Masjid Baitul Makmur">
+        </div>
+        <div class="form-group">
+          <label for="input-masjid-address">Alamat:</label>
+          <input type="text" id="input-masjid-address" required placeholder="Contoh: Jl. Diponegoro No. 12">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-reset-default" class="btn btn-secondary">Reset ke Awal</button>
+          <div class="action-right">
+            <button type="button" id="btn-cancel-modal" class="btn btn-light">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
