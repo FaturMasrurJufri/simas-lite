@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transparansi Kas & Kegiatan Masjid</title>
+  <title>Transparansi Kas & Agenda Masjid</title>
   <style>
     :root {
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -17,381 +17,160 @@
       --color-success: #16a34a;
       --color-danger: #dc2626;
       --radius: 10px;
-      --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-family); background-color: var(--bg-primary); color: var(--text-main); line-height: 1.5; padding-bottom: 3rem; }
+    .container { width: 100%; max-width: 1000px; margin: 0 auto; padding: 0 1.25rem; }
 
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-primary);
-      color: var(--text-main);
-      line-height: 1.5;
-      padding-bottom: 3rem;
-    }
+    .app-header { background: var(--bg-surface); border-bottom: 1px solid var(--border-color); padding: 1.25rem 0; margin-bottom: 1.75rem; }
+    .header-container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .title-row { display: flex; align-items: center; gap: 0.5rem; }
+    .app-header h1 { font-size: 1.35rem; font-weight: 700; }
+    .text-muted { color: var(--text-muted); font-size: 0.85rem; }
 
-    .container {
-      width: 100%;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 0 1.25rem;
-    }
+    .header-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .btn-admin-toggle { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.45rem 0.85rem; font-size: 0.825rem; font-weight: 600; cursor: pointer; }
+    .btn-admin-toggle.active { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
-    .app-header {
-      background-color: var(--bg-surface);
-      border-bottom: 1px solid var(--border-color);
-      padding: 1.5rem 0;
-      margin-bottom: 1.75rem;
-    }
-
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .title-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .app-header h1 {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .btn-icon {
-      background: #f1f5f9;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 0.2rem 0.5rem;
-      font-size: 0.85rem;
-      cursor: pointer;
-      line-height: 1;
-    }
-
-    .btn-icon:hover {
-      background: #e2e8f0;
-    }
-
-    .text-muted {
-      color: var(--text-muted);
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
-    }
-
-    .period-badge {
-      background-color: #e0f2fe;
-      color: #0369a1;
-      padding: 0.4rem 0.85rem;
-      border-radius: 9999px;
-      font-size: 0.825rem;
-      font-weight: 600;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.75rem;
-    }
-
-    .card {
-      background: var(--bg-surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-      padding: 1.25rem;
-      box-shadow: var(--shadow);
-    }
-
-    .card-summary {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .card-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .card-value {
-      font-size: 1.45rem;
-      font-weight: 700;
-    }
-
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+    .card { background: var(--bg-surface); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 1.25rem; box-shadow: var(--shadow); }
+    .card-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .card-value { font-size: 1.45rem; font-weight: 700; margin-top: 0.25rem; }
     .text-success { color: var(--color-success); }
     .text-danger { color: var(--color-danger); }
     .text-primary { color: var(--color-primary); }
 
-    .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      background: var(--bg-surface);
-      padding: 1rem;
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-      margin-bottom: 1.25rem;
-      box-shadow: var(--shadow);
-    }
+    /* Admin Panel Form */
+    .admin-panel { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.75rem; }
+    .admin-panel-title { font-size: 1.05rem; font-weight: 700; color: #166534; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .admin-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
 
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      flex: 1 1 180px;
-    }
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; background: var(--bg-surface); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border-color); margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+    .form-group { display: flex; flex-direction: column; gap: 0.25rem; flex: 1 1 180px; }
+    .form-group label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+    .form-group input, .form-group select { height: 2.4rem; padding: 0 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-surface); font-size: 0.875rem; outline: none; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--color-primary); }
 
-    .filter-group label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .filter-group input,
-    .filter-group select {
-      height: 2.4rem;
-      padding: 0 0.75rem;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      background: var(--bg-surface);
-      font-size: 0.875rem;
-      outline: none;
-    }
-
-    .filter-group input:focus,
-    .filter-group select:focus {
-      border-color: var(--color-primary);
-    }
-
-    .table-container {
-      overflow-x: auto;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.875rem;
-      min-width: 550px;
-    }
-
-    .data-table th,
-    .data-table td {
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .data-table th {
-      background-color: #f8fafc;
-      font-weight: 600;
-      color: #334155;
-    }
-
-    .data-table tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .data-table tbody tr:hover {
-      background-color: #f8fafc;
-    }
-
+    .table-container { overflow-x: auto; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; min-width: 550px; }
+    .data-table th, .data-table td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color); }
+    .data-table th { background-color: #f8fafc; font-weight: 600; color: #334155; }
+    .data-table tbody tr:hover { background-color: #f8fafc; }
     .text-right { text-align: right; }
     .text-center { text-align: center; }
 
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
+    .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .badge-masuk { background-color: #dcfce7; color: #15803d; }
+    .badge-keluar { background-color: #fee2e2; color: #b91c1c; }
+    .badge-category { background-color: #f1f5f9; color: #475569; text-transform: capitalize; }
 
-    .badge-masuk {
-      background-color: #dcfce7;
-      color: #15803d;
-    }
+    .btn { height: 2.4rem; padding: 0 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--color-primary); color: #fff; }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-success { background: var(--color-success); color: #fff; }
+    .btn-light { background: #f1f5f9; color: #334155; border: 1px solid var(--border-color); }
 
-    .badge-keluar {
-      background-color: #fee2e2;
-      color: #b91c1c;
-    }
-
-    .badge-category {
-      background-color: #f1f5f9;
-      color: #475569;
-      text-transform: capitalize;
-    }
-
-    .empty-state {
-      padding: 2.5rem 1rem;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.875rem;
-    }
-
-    .modal {
-      margin: auto;
-      padding: 0;
-      border: none;
-      border-radius: var(--radius);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-      width: 90%;
-      max-width: 440px;
-    }
-
-    .modal::backdrop {
-      background: rgba(15, 23, 42, 0.5);
-      backdrop-filter: blur(2px);
-    }
-
-    .modal-card {
-      padding: 1.5rem;
-      background: var(--bg-surface);
-    }
-
-    .modal-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      margin-bottom: 1rem;
-    }
-
-    .form-group label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .form-group input {
-      height: 2.4rem;
-      padding: 0 0.75rem;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 0.9rem;
-      outline: none;
-    }
-
-    .form-group input:focus {
-      border-color: var(--color-primary);
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 1.5rem;
-      gap: 0.5rem;
-    }
-
-    .action-right {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .btn {
-      height: 2.3rem;
-      padding: 0 0.9rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid transparent;
-    }
-
-    .btn-primary {
-      background-color: var(--color-primary);
-      color: #ffffff;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--color-primary-hover);
-    }
-
-    .btn-light {
-      background-color: #f1f5f9;
-      color: #334155;
-      border-color: var(--border-color);
-    }
-
-    .btn-secondary {
-      background-color: transparent;
-      color: var(--color-danger);
-      border-color: #fca5a5;
-    }
+    .modal { margin: auto; padding: 0; border: none; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.25); width: 90%; max-width: 380px; }
+    .modal::backdrop { background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px); }
+    .modal-card { padding: 1.5rem; background: var(--bg-surface); }
+    .modal-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem; }
   </style>
 </head>
 <body>
   <header class="app-header">
     <div class="container header-container">
       <div>
-        <div class="title-row">
-          <h1 id="masjid-name">Masjid Al-Ikhlas</h1>
-          <button id="btn-edit-masjid" class="btn-icon" title="Edit Profil Masjid">✏️ Ubah</button>
-        </div>
-        <p id="masjid-address" class="text-muted">Jl. Kaliurang KM 9, Sleman, Yogyakarta</p>
+        <h1 id="masjid-name">Masjid Al-Ikhlas</h1>
+        <p id="masjid-address" class="text-muted">Laporan Real-Time Kas & Keuangan Operasional</p>
       </div>
-      <div class="period-badge" id="masjid-period">Periode: Oktober 2026</div>
+      <div class="header-actions">
+        <button id="btn-admin-auth" class="btn-admin-toggle">🔐 Mode Bendahara</button>
+      </div>
     </div>
   </header>
 
   <main class="container">
+    <!-- Panel Bendahara (Tersembunyi Awalnya) -->
+    <section id="admin-panel" class="admin-panel" style="display: none;">
+      <div class="admin-panel-title">
+        <span>Catat Transaksi Baru</span>
+        <span style="font-size: 0.8rem; font-weight: normal; color: #166534;">Mode Bendahara Aktif</span>
+      </div>
+      <form id="form-transaksi-admin">
+        <div class="admin-form-grid">
+          <div class="form-group">
+            <label for="adm-date">Tanggal</label>
+            <input type="date" id="adm-date" required>
+          </div>
+          <div class="form-group">
+            <label for="adm-type">Tipe Kas</label>
+            <select id="adm-type" required>
+              <option value="masuk">Pemasukan (+)</option>
+              <option value="keluar">Pengeluaran (-)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="adm-cat">Kategori</label>
+            <select id="adm-cat" required>
+              <option value="infaq">Infaq / Sedekah</option>
+              <option value="operasional">Operasional</option>
+              <option value="renovasi">Renovasi / Fisik</option>
+              <option value="sosial">Sosial / Yatim</option>
+              <option value="dakwah">Dakwah & Kajian</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="adm-amount">Jumlah (Rp)</label>
+            <input type="number" id="adm-amount" min="1000" placeholder="Contoh: 500000" required>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label for="adm-desc">Keterangan Transaksi</label>
+          <input type="text" id="adm-desc" placeholder="Contoh: Pembelian mic wireless & kabel sound" required>
+        </div>
+        <div style="margin-top: 1rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+          <button type="submit" id="btn-submit-kas" class="btn btn-success">Kirim Transaksi</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Ringkasan Saldo -->
     <section class="summary-grid">
-      <article class="card card-summary">
+      <article class="card">
         <span class="card-label">Total Pemasukan</span>
         <h2 class="card-value text-success" id="total-masuk">Rp 0</h2>
       </article>
-      <article class="card card-summary">
+      <article class="card">
         <span class="card-label">Total Pengeluaran</span>
         <h2 class="card-value text-danger" id="total-keluar">Rp 0</h2>
       </article>
-      <article class="card card-summary">
+      <article class="card">
         <span class="card-label">Saldo Berjalan</span>
         <h2 class="card-value text-primary" id="saldo-akhir">Rp 0</h2>
       </article>
     </section>
 
-    <section class="content-section">
+    <!-- Filter & Tabel Publik -->
+    <section>
       <div class="filter-bar">
-        <div class="filter-group">
-          <label for="search-input">Cari Transaksi</label>
-          <input type="text" id="search-input" placeholder="Contoh: Kotak Jumat, Listrik...">
+        <div class="form-group">
+          <label for="search-input">Cari</label>
+          <input type="text" id="search-input" placeholder="Cari transaksi...">
         </div>
-        <div class="filter-group">
-          <label for="filter-type">Tipe Transaksi</label>
+        <div class="form-group">
+          <label for="filter-type">Tipe</label>
           <select id="filter-type">
             <option value="all">Semua Tipe</option>
             <option value="masuk">Pemasukan</option>
             <option value="keluar">Pengeluaran</option>
           </select>
         </div>
-        <div class="filter-group">
-          <label for="filter-category">Kategori</label>
-          <select id="filter-category">
-            <option value="all">Semua Kategori</option>
+        <div class="form-group">
+          <label for="filter-cat">Kategori</label>
+          <select id="filter-cat">
             <option value="all">Semua Kategori</option>
             <option value="infaq">Infaq / Sedekah</option>
             <option value="operasional">Operasional</option>
@@ -406,7 +185,6 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Tanggal</th>
               <th>Deskripsi</th>
               <th>Kategori</th>
@@ -414,66 +192,73 @@
               <th class="text-right">Nominal</th>
             </tr>
           </thead>
-          <tbody id="transaction-list"></tbody>
+          <tbody id="transaction-list">
+            <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
+          </tbody>
         </table>
       </div>
-      <div id="empty-state" class="empty-state" style="display: none;">
-        Data transaksi tidak ditemukan.
+      <div id="empty-state" style="display: none; padding: 2rem; text-align: center; color: var(--text-muted);">
+        Data tidak ditemukan.
       </div>
     </section>
   </main>
 
-  <dialog id="modal-edit-masjid" class="modal">
+  <!-- Modal Autentikasi Bendahara -->
+  <dialog id="modal-auth" class="modal">
     <div class="modal-card">
-      <h3 class="modal-title">Ubah Identitas Masjid</h3>
-      <form id="form-edit-masjid" method="dialog">
+      <h3 class="modal-title">Akses Bendahara</h3>
+      <form id="form-auth" method="dialog">
         <div class="form-group">
-          <label for="input-masjid-name">Nama Masjid</label>
-          <input type="text" id="input-masjid-name" required placeholder="Contoh: Masjid Baitul Makmur">
-        </div>
-        <div class="form-group">
-          <label for="input-masjid-address">Alamat</label>
-          <input type="text" id="input-masjid-address" required placeholder="Contoh: Jl. Magelang KM 5">
+          <label for="pin-input">Masukkan PIN Pengurus:</label>
+          <input type="password" id="pin-input" placeholder="Default PIN: 1234" required>
         </div>
         <div class="modal-actions">
-          <button type="button" id="btn-reset-default" class="btn btn-secondary">Reset</button>
-          <div class="action-right">
-            <button type="button" id="btn-cancel-modal" class="btn btn-light">Batal</button>
-            <button type="submit" class="btn btn-primary">Simpan</button>
-          </div>
+          <button type="button" id="btn-cancel-auth" class="btn btn-light">Batal</button>
+          <button type="submit" class="btn btn-primary">Masuk</button>
         </div>
       </form>
     </div>
   </dialog>
 
   <script>
-    const INITIAL_DATA = {
-      masjidInfo: {
-        nama: "Masjid Al-Ikhlas",
-        alamat: "Jl. Kaliurang KM 9, Sleman, Yogyakarta",
-        periode: "Oktober 2026"
-      },
-      transaksi: [
-        { id: "TX-001", tanggal: "2026-10-01", deskripsi: "Infaq Kotak Jumat Pekan 1", kategori: "infaq", tipe: "masuk", jumlah: 4500000 },
-        { id: "TX-002", tanggal: "2026-10-03", deskripsi: "Biaya Kebersihan & Pembelian Sabun/Pembersih", kategori: "operasional", tipe: "keluar", jumlah: 350000 },
-        { id: "TX-003", tanggal: "2026-10-07", deskripsi: "Santunan Yatim Piatu Bulanan", kategori: "sosial", tipe: "keluar", jumlah: 2000000 },
-        { id: "TX-004", tanggal: "2026-10-10", deskripsi: "Wakaf Pembangunan Kanopi Parkir", kategori: "renovasi", tipe: "masuk", jumlah: 7500000 },
-        { id: "TX-005", tanggal: "2026-10-15", deskripsi: "Honorarium Pemateri Kajian Ahad Pagi", kategori: "dakwah", tipe: "keluar", jumlah: 500000 },
-        { id: "TX-006", tanggal: "2026-10-18", deskripsi: "Infaq Kotak Jumat Pekan 2", kategori: "infaq", tipe: "masuk", jumlah: 3800000 },
-        { id: "TX-007", tanggal: "2026-10-22", deskripsi: "Pembayaran Tagihan Listrik & Internet", kategori: "operasional", tipe: "keluar", jumlah: 850000 }
-      ]
+    // ==========================================
+    // KONFIGURASI GOOGLE SHEETS & GOOGLE FORMS
+    // ==========================================
+    const CONFIG = {
+      // PIN Pengurus / Bendahara
+      ADMIN_PIN: "1234",
+
+      // 1. URL CSV dari Google Sheet (File > Bagikan > Publikasikan ke web > Pilih Format .csv)
+      SHEET_CSV_URL: "", 
+
+      // 2. Action Form Response dari Google Form
+      FORM_ACTION_URL: "https://docs.google.com/forms/d/e/XXXX/formResponse",
+
+      // 3. ID Entry input di Google Form (entry.XXXXX)
+      ENTRY_IDS: {
+        tanggal: "entry.111111",
+        deskripsi: "entry.222222",
+        kategori: "entry.333333",
+        tipe: "entry.444444",
+        jumlah: "entry.555555"
+      }
     };
 
-    class MasjidApp {
+    // Data Mock Fallback (Jika SHEET_CSV_URL belum diisi)
+    const MOCK_DATA = [
+      { tanggal: "2026-10-01", deskripsi: "Infaq Kotak Jumat Pekan 1", kategori: "infaq", tipe: "masuk", jumlah: 4500000 },
+      { tanggal: "2026-10-03", deskripsi: "Biaya Kebersihan & Sabun", kategori: "operasional", tipe: "keluar", jumlah: 350000 },
+      { tanggal: "2026-10-07", deskripsi: "Santunan Yatim Bulanan", kategori: "sosial", tipe: "keluar", jumlah: 2000000 },
+      { tanggal: "2026-10-10", deskripsi: "Wakaf Kanopi Parkir", kategori: "renovasi", tipe: "masuk", jumlah: 7500000 },
+      { tanggal: "2026-10-15", deskripsi: "Honorarium Pemateri Kajian Ahad", kategori: "dakwah", tipe: "keluar", jumlah: 500000 }
+    ];
+
+    class App {
       constructor() {
-        this.storageKey = "masjid_custom_profile";
-        this.data = INITIAL_DATA;
-        this.activeInfo = { ...this.data.masjidInfo };
+        this.transactions = [];
+        this.isAdmin = false;
 
         this.elements = {
-          masjidName: document.getElementById("masjid-name"),
-          masjidAddress: document.getElementById("masjid-address"),
-          masjidPeriod: document.getElementById("masjid-period"),
           totalMasuk: document.getElementById("total-masuk"),
           totalKeluar: document.getElementById("total-keluar"),
           saldoAkhir: document.getElementById("saldo-akhir"),
@@ -481,14 +266,16 @@
           emptyState: document.getElementById("empty-state"),
           searchInput: document.getElementById("search-input"),
           filterType: document.getElementById("filter-type"),
-          filterCategory: document.getElementById("filter-category"),
-          btnEditMasjid: document.getElementById("btn-edit-masjid"),
-          modalEdit: document.getElementById("modal-edit-masjid"),
-          formEdit: document.getElementById("form-edit-masjid"),
-          inputName: document.getElementById("input-masjid-name"),
-          inputAddress: document.getElementById("input-masjid-address"),
-          btnCancelModal: document.getElementById("btn-cancel-modal"),
-          btnResetDefault: document.getElementById("btn-reset-default")
+          filterCat: document.getElementById("filter-cat"),
+          btnAdminAuth: document.getElementById("btn-admin-auth"),
+          adminPanel: document.getElementById("admin-panel"),
+          formTransaksiAdmin: document.getElementById("form-transaksi-admin"),
+          btnSubmitKas: document.getElementById("btn-submit-kas"),
+          modalAuth: document.getElementById("modal-auth"),
+          formAuth: document.getElementById("form-auth"),
+          pinInput: document.getElementById("pin-input"),
+          btnCancelAuth: document.getElementById("btn-cancel-auth"),
+          admDate: document.getElementById("adm-date")
         };
 
         this.formatRupiah = new Intl.NumberFormat("id-ID", {
@@ -498,71 +285,156 @@
         });
       }
 
-      init() {
-        this.loadProfile();
+      async init() {
+        this.elements.admDate.value = new Date().toISOString().split("T")[0];
         this.bindEvents();
-        this.renderSummary();
-        this.renderTable(this.data.transaksi);
-      }
-
-      loadProfile() {
-        try {
-          const saved = localStorage.getItem(this.storageKey);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            this.activeInfo.nama = parsed.nama || this.data.masjidInfo.nama;
-            this.activeInfo.alamat = parsed.alamat || this.data.masjidInfo.alamat;
-          }
-        } catch (e) {
-          console.warn("Gagal membaca storage, menggunakan default:", e);
-        }
-
-        this.elements.masjidName.textContent = this.activeInfo.nama;
-        this.elements.masjidAddress.textContent = this.activeInfo.alamat;
-        this.elements.masjidPeriod.textContent = `Periode: ${this.activeInfo.periode}`;
+        await this.loadData();
       }
 
       bindEvents() {
         this.elements.searchInput.addEventListener("input", () => this.applyFilters());
         this.elements.filterType.addEventListener("change", () => this.applyFilters());
-        this.elements.filterCategory.addEventListener("change", () => this.applyFilters());
+        this.elements.filterCat.addEventListener("change", () => this.applyFilters());
 
-        this.elements.btnEditMasjid.addEventListener("click", () => {
-          this.elements.inputName.value = this.activeInfo.nama;
-          this.elements.inputAddress.value = this.activeInfo.alamat;
-          this.elements.modalEdit.showModal();
+        // Auth Bendahara
+        this.elements.btnAdminAuth.addEventListener("click", () => {
+          if (this.isAdmin) {
+            this.setAdminMode(false);
+          } else {
+            this.elements.pinInput.value = "";
+            this.elements.modalAuth.showModal();
+          }
         });
 
-        this.elements.btnCancelModal.addEventListener("click", () => this.elements.modalEdit.close());
+        this.elements.btnCancelAuth.addEventListener("click", () => this.elements.modalAuth.close());
 
-        this.elements.formEdit.addEventListener("submit", (e) => {
+        this.elements.formAuth.addEventListener("submit", (e) => {
           e.preventDefault();
-          const name = this.elements.inputName.value.trim();
-          const addr = this.elements.inputAddress.value.trim();
-          if (!name || !addr) return;
-
-          this.activeInfo.nama = name;
-          this.activeInfo.alamat = addr;
-          localStorage.setItem(this.storageKey, JSON.stringify({ nama: name, alamat: addr }));
-          this.loadProfile();
-          this.elements.modalEdit.close();
+          if (this.elements.pinInput.value === CONFIG.ADMIN_PIN) {
+            this.setAdminMode(true);
+            this.elements.modalAuth.close();
+          } else {
+            alert("PIN Salah! Akses ditolak.");
+          }
         });
 
-        this.elements.btnResetDefault.addEventListener("click", () => {
-          localStorage.removeItem(this.storageKey);
-          this.activeInfo = { ...this.data.masjidInfo };
-          this.loadProfile();
-          this.elements.modalEdit.close();
-        });
+        // Submit Kas Baru oleh Bendahara
+        this.elements.formTransaksiAdmin.addEventListener("submit", (e) => this.handleSubmitKas(e));
+      }
+
+      setAdminMode(status) {
+        this.isAdmin = status;
+        if (status) {
+          this.elements.adminPanel.style.display = "block";
+          this.elements.btnAdminAuth.textContent = "🔓 Keluar Mode Bendahara";
+          this.elements.btnAdminAuth.classList.add("active");
+        } else {
+          this.elements.adminPanel.style.display = "none";
+          this.elements.btnAdminAuth.textContent = "🔐 Mode Bendahara";
+          this.elements.btnAdminAuth.classList.remove("active");
+        }
+      }
+
+      async loadData() {
+        if (!CONFIG.SHEET_CSV_URL) {
+          // Pakai mock data jika belum pasang Google Sheet
+          this.transactions = MOCK_DATA;
+          this.renderSummary();
+          this.applyFilters();
+          return;
+        }
+
+        try {
+          const res = await fetch(CONFIG.SHEET_CSV_URL);
+          const csvText = await res.text();
+          this.transactions = this.parseCSV(csvText);
+          this.renderSummary();
+          this.applyFilters();
+        } catch (err) {
+          console.error("Gagal membaca Google Sheet:", err);
+          this.transactions = MOCK_DATA;
+          this.renderSummary();
+          this.applyFilters();
+        }
+      }
+
+      parseCSV(text) {
+        const rows = text.trim().split("\n").map(r => r.split(","));
+        if (rows.length <= 1) return [];
+
+        // Anggap baris 0 adalah Header: Timestamp, Tanggal, Deskripsi, Kategori, Tipe, Jumlah
+        return rows.slice(1).map(col => ({
+          tanggal: col[1]?.replace(/"/g, "").trim(),
+          deskripsi: col[2]?.replace(/"/g, "").trim(),
+          kategori: col[3]?.replace(/"/g, "").trim().toLowerCase(),
+          tipe: col[4]?.replace(/"/g, "").trim().toLowerCase(),
+          jumlah: Number(col[5]?.replace(/[^0-9]/g, "")) || 0
+        })).filter(item => item.deskripsi && item.jumlah > 0);
+      }
+
+      async handleSubmitKas(e) {
+        e.preventDefault();
+        const submitBtn = this.elements.btnSubmitKas;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Mengirim...";
+
+        const payload = {
+          tanggal: document.getElementById("adm-date").value,
+          tipe: document.getElementById("adm-type").value,
+          kategori: document.getElementById("adm-cat").value,
+          jumlah: document.getElementById("adm-amount").value,
+          deskripsi: document.getElementById("adm-desc").value
+        };
+
+        if (CONFIG.FORM_ACTION_URL && !CONFIG.FORM_ACTION_URL.includes("XXXX")) {
+          // Kirim langsung ke Google Forms via background POST
+          const formData = new FormData();
+          formData.append(CONFIG.ENTRY_IDS.tanggal, payload.tanggal);
+          formData.append(CONFIG.ENTRY_IDS.deskripsi, payload.deskripsi);
+          formData.append(CONFIG.ENTRY_IDS.kategori, payload.kategori);
+          formData.append(CONFIG.ENTRY_IDS.tipe, payload.tipe);
+          formData.append(CONFIG.ENTRY_IDS.jumlah, payload.jumlah);
+
+          try {
+            await fetch(CONFIG.FORM_ACTION_URL, {
+              method: "POST",
+              mode: "no-cors",
+              body: formData
+            });
+            alert("Transaksi berhasil dicatat ke Google Sheets!");
+            this.elements.formTransaksiAdmin.reset();
+            this.elements.admDate.value = new Date().toISOString().split("T")[0];
+            await this.loadData();
+          } catch (err) {
+            alert("Gagal mengirim ke Google Sheets: " + err.message);
+          }
+        } else {
+          // Simulasi lokal jika Form Action belum diset
+          this.transactions.unshift({
+            tanggal: payload.tanggal,
+            deskripsi: payload.deskripsi,
+            kategori: payload.kategori,
+            tipe: payload.tipe,
+            jumlah: Number(payload.jumlah)
+          });
+          this.renderSummary();
+          this.applyFilters();
+          alert("Transaksi berhasil ditambahkan (Mode Demo Lokal)!");
+          this.elements.formTransaksiAdmin.reset();
+          this.elements.admDate.value = new Date().toISOString().split("T")[0];
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Kirim Transaksi";
       }
 
       renderSummary() {
         let masuk = 0;
         let keluar = 0;
 
-        this.data.transaksi.forEach(tx => {
+        this.transactions.forEach(tx => {
           if (tx.tipe === "masuk") masuk += tx.jumlah;
-          else keluar += tx.jumlah;
+          else if (tx.tipe === "keluar") keluar += tx.jumlah;
         });
 
         this.elements.totalMasuk.textContent = this.formatRupiah.format(masuk);
@@ -571,14 +443,14 @@
       }
 
       applyFilters() {
-        const keyword = this.elements.searchInput.value.trim().toLowerCase();
+        const kw = this.elements.searchInput.value.trim().toLowerCase();
         const type = this.elements.filterType.value;
-        const category = this.elements.filterCategory.value;
+        const cat = this.elements.filterCat.value;
 
-        const filtered = this.data.transaksi.filter(tx => {
-          const matchKw = tx.deskripsi.toLowerCase().includes(keyword) || tx.id.toLowerCase().includes(keyword);
+        const filtered = this.transactions.filter(tx => {
+          const matchKw = tx.deskripsi.toLowerCase().includes(kw);
           const matchType = type === "all" || tx.tipe === type;
-          const matchCat = category === "all" || tx.kategori === category;
+          const matchCat = cat === "all" || tx.kategori === cat;
           return matchKw && matchType && matchCat;
         });
 
@@ -601,8 +473,7 @@
           const tr = document.createElement("tr");
           const isMasuk = tx.tipe === "masuk";
           tr.innerHTML = `
-            <td><code>${tx.id}</code></td>
-            <td>${new Date(tx.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>
+            <td>${tx.tanggal}</td>
             <td>${this.escapeHtml(tx.deskripsi)}</td>
             <td><span class="badge badge-category">${this.escapeHtml(tx.kategori)}</span></td>
             <td><span class="badge ${isMasuk ? 'badge-masuk' : 'badge-keluar'}">${isMasuk ? 'Masuk' : 'Keluar'}</span></td>
@@ -622,7 +493,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      new MasjidApp().init();
+      new App().init();
     });
   </script>
 </body>
