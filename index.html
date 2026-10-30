@@ -372,23 +372,27 @@
         })).filter(item => item.deskripsi && item.jumlah > 0);
       }
 
-      async handleSubmitKas(e) {
+            async handleSubmitKas(e) {
         e.preventDefault();
         const submitBtn = this.elements.btnSubmitKas;
         submitBtn.disabled = true;
         submitBtn.textContent = "Mengirim...";
 
+        const rawType = document.getElementById("adm-type").value;
+        // Samakan persis dengan opsi di Google Form (Huruf Besar di awal: Masuk / Keluar)
+        const formattedType = rawType === "masuk" ? "Masuk" : "Keluar";
+
         const payload = {
           tanggal: document.getElementById("adm-date").value,
-          tipe: document.getElementById("adm-type").value,
+          tipe: formattedType,
           kategori: document.getElementById("adm-cat").value,
           jumlah: document.getElementById("adm-amount").value,
           deskripsi: document.getElementById("adm-desc").value
         };
 
         if (CONFIG.FORM_ACTION_URL && !CONFIG.FORM_ACTION_URL.includes("XXXX")) {
-          // Kirim langsung ke Google Forms via background POST
-          const formData = new FormData();
+          // Gunakan URLSearchParams agar format encoding diterima penuh oleh Google Form
+          const formData = new URLSearchParams();
           formData.append(CONFIG.ENTRY_IDS.tanggal, payload.tanggal);
           formData.append(CONFIG.ENTRY_IDS.deskripsi, payload.deskripsi);
           formData.append(CONFIG.ENTRY_IDS.kategori, payload.kategori);
@@ -399,22 +403,31 @@
             await fetch(CONFIG.FORM_ACTION_URL, {
               method: "POST",
               mode: "no-cors",
-              body: formData
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              body: formData.toString()
             });
-            alert("Transaksi berhasil dicatat ke Google Sheets!");
+
+            alert("Transaksi berhasil dikirim ke Google Form!");
             this.elements.formTransaksiAdmin.reset();
             this.elements.admDate.value = new Date().toISOString().split("T")[0];
-            await this.loadData();
+            
+            // Beri jeda 2 detik agar Google Sheets sempat memperbarui datanya sebelum ditarik ulang
+            setTimeout(() => {
+              this.loadData();
+            }, 2000);
+
           } catch (err) {
-            alert("Gagal mengirim ke Google Sheets: " + err.message);
+            alert("Gagal mengirim: " + err.message);
           }
         } else {
-          // Simulasi lokal jika Form Action belum diset
+          // Fallback lokal
           this.transactions.unshift({
             tanggal: payload.tanggal,
             deskripsi: payload.deskripsi,
             kategori: payload.kategori,
-            tipe: payload.tipe,
+            tipe: rawType,
             jumlah: Number(payload.jumlah)
           });
           this.renderSummary();
@@ -427,6 +440,7 @@
         submitBtn.disabled = false;
         submitBtn.textContent = "Kirim Transaksi";
       }
+
 
       renderSummary() {
         let masuk = 0;
