@@ -201,6 +201,7 @@
         Data tidak ditemukan.
       </div>
     </section>
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
   </main>
 
   <!-- Modal Autentikasi Bendahara -->
@@ -372,55 +373,59 @@
         })).filter(item => item.deskripsi && item.jumlah > 0);
       }
 
-            async handleSubmitKas(e) {
+                  handleSubmitKas(e) {
         e.preventDefault();
         const submitBtn = this.elements.btnSubmitKas;
         submitBtn.disabled = true;
         submitBtn.textContent = "Mengirim...";
 
         const rawType = document.getElementById("adm-type").value;
-        // Samakan persis dengan opsi di Google Form (Huruf Besar di awal: Masuk / Keluar)
         const formattedType = rawType === "masuk" ? "Masuk" : "Keluar";
 
-        const payload = {
-          tanggal: document.getElementById("adm-date").value,
-          tipe: formattedType,
-          kategori: document.getElementById("adm-cat").value,
-          jumlah: document.getElementById("adm-amount").value,
-          deskripsi: document.getElementById("adm-desc").value
-        };
+        const tanggal = document.getElementById("adm-date").value;
+        const deskripsi = document.getElementById("adm-desc").value;
+        const kategori = document.getElementById("adm-cat").value;
+        const jumlah = document.getElementById("adm-amount").value;
 
-        if (CONFIG.FORM_ACTION_URL && !CONFIG.FORM_ACTION_URL.includes("XXXX")) {
-          // Gunakan URLSearchParams agar format encoding diterima penuh oleh Google Form
-          const formData = new URLSearchParams();
-          formData.append(CONFIG.ENTRY_IDS.tanggal, payload.tanggal);
-          formData.append(CONFIG.ENTRY_IDS.deskripsi, payload.deskripsi);
-          formData.append(CONFIG.ENTRY_IDS.kategori, payload.kategori);
-          formData.append(CONFIG.ENTRY_IDS.tipe, payload.tipe);
-          formData.append(CONFIG.ENTRY_IDS.jumlah, payload.jumlah);
+        // Buat form temporer yang menembak langsung ke iframe
+        const form = document.createElement("form");
+        form.action = CONFIG.FORM_ACTION_URL;
+        form.method = "POST";
+        form.target = "hidden_iframe";
 
-          try {
-            await fetch(CONFIG.FORM_ACTION_URL, {
-              method: "POST",
-              mode: "no-cors",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-              },
-              body: formData.toString()
-            });
+        const fields = [
+          { name: CONFIG.ENTRY_IDS.tanggal, value: tanggal },
+          { name: CONFIG.ENTRY_IDS.deskripsi, value: deskripsi },
+          { name: CONFIG.ENTRY_IDS.kategori, value: kategori },
+          { name: CONFIG.ENTRY_IDS.tipe, value: formattedType },
+          { name: CONFIG.ENTRY_IDS.jumlah, value: jumlah }
+        ];
 
-            alert("Transaksi berhasil dikirim ke Google Form!");
-            this.elements.formTransaksiAdmin.reset();
-            this.elements.admDate.value = new Date().toISOString().split("T")[0];
-            
-            // Beri jeda 2 detik agar Google Sheets sempat memperbarui datanya sebelum ditarik ulang
-            setTimeout(() => {
-              this.loadData();
-            }, 2000);
+        fields.forEach(field => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = field.name;
+          input.value = field.value;
+          form.appendChild(input);
+        });
 
-          } catch (err) {
-            alert("Gagal mengirim: " + err.message);
-          }
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+
+        // Feedback langsung ke bendahara
+        setTimeout(() => {
+          alert("Transaksi berhasil dicatat ke Google Sheets!");
+          this.elements.formTransaksiAdmin.reset();
+          this.elements.admDate.value = new Date().toISOString().split("T")[0];
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Kirim Transaksi";
+          
+          // Muat ulang data tabel
+          this.loadData();
+        }, 1500);
+      }
+
         } else {
           // Fallback lokal
           this.transactions.unshift({
