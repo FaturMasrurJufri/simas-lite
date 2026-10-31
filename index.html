@@ -26,7 +26,6 @@
 
     .app-header { background: var(--bg-surface); border-bottom: 1px solid var(--border-color); padding: 1.25rem 0; margin-bottom: 1.75rem; }
     .header-container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-    .title-row { display: flex; align-items: center; gap: 0.5rem; }
     .app-header h1 { font-size: 1.35rem; font-weight: 700; }
     .text-muted { color: var(--text-muted); font-size: 0.85rem; }
 
@@ -42,7 +41,6 @@
     .text-danger { color: var(--color-danger); }
     .text-primary { color: var(--color-primary); }
 
-    /* Admin Panel Form */
     .admin-panel { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.75rem; }
     .admin-panel-title { font-size: 1.05rem; font-weight: 700; color: #166534; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
     .admin-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
@@ -93,7 +91,6 @@
   </header>
 
   <main class="container">
-    <!-- Panel Bendahara (Tersembunyi Awalnya) -->
     <section id="admin-panel" class="admin-panel" style="display: none;">
       <div class="admin-panel-title">
         <span>Catat Transaksi Baru</span>
@@ -137,7 +134,6 @@
       </form>
     </section>
 
-    <!-- Ringkasan Saldo -->
     <section class="summary-grid">
       <article class="card">
         <span class="card-label">Total Pemasukan</span>
@@ -153,7 +149,6 @@
       </article>
     </section>
 
-    <!-- Filter & Tabel Publik -->
     <section>
       <div class="filter-bar">
         <div class="form-group">
@@ -204,7 +199,6 @@
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
   </main>
 
-  <!-- Modal Autentikasi Bendahara -->
   <dialog id="modal-auth" class="modal">
     <div class="modal-card">
       <h3 class="modal-title">Akses Bendahara</h3>
@@ -222,20 +216,10 @@
   </dialog>
 
   <script>
-    // ==========================================
-    // KONFIGURASI GOOGLE SHEETS & GOOGLE FORMS
-    // ==========================================
     const CONFIG = {
-      // PIN Pengurus / Bendahara
       ADMIN_PIN: "1234",
-
-      // 1. URL CSV publikasi Google Sheet (SUDAH TERPASANG)
-      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRSKhEv_q4cYENlirVQ6yAR4J2ITp8FAHpF1PK4tFcIOkAdUe9wgEXpMAxao2_WfZ1uo-Iq8cISBXGN/pub?output=csv", 
-
-      // 2. Action Form Response Google Form (SUDAH TERPASANG)
+      SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRSKhEv_q4cYENlirVQ6yAR4J2ITp8FAHpF1PK4tFcIOkAdUe9wgEXpMAxao2_WfZ1uo-Iq8cISBXGN/pub?output=csv",
       FORM_ACTION_URL: "https://docs.google.com/forms/d/e/1FAIpQLSegnYKxwrJ6ne1_2AgdgNz2p2UeYBrXpAUSTg8jkO6vHROJ2Q/formResponse",
-
-      // 3. ID Entry Google Form (SUDAH SESUAI)
       ENTRY_IDS: {
         tanggal: "entry.1995224591",
         deskripsi: "entry.193800377",
@@ -245,7 +229,6 @@
       }
     };
 
-    // Data Mock Fallback (Jika SHEET_CSV_URL belum diisi)
     const MOCK_DATA = [
       { tanggal: "2026-10-01", deskripsi: "Infaq Kotak Jumat Pekan 1", kategori: "infaq", tipe: "masuk", jumlah: 4500000 },
       { tanggal: "2026-10-03", deskripsi: "Biaya Kebersihan & Sabun", kategori: "operasional", tipe: "keluar", jumlah: 350000 },
@@ -297,7 +280,6 @@
         this.elements.filterType.addEventListener("change", () => this.applyFilters());
         this.elements.filterCat.addEventListener("change", () => this.applyFilters());
 
-        // Auth Bendahara
         this.elements.btnAdminAuth.addEventListener("click", () => {
           if (this.isAdmin) {
             this.setAdminMode(false);
@@ -319,7 +301,6 @@
           }
         });
 
-        // Submit Kas Baru oleh Bendahara
         this.elements.formTransaksiAdmin.addEventListener("submit", (e) => this.handleSubmitKas(e));
       }
 
@@ -338,7 +319,6 @@
 
       async loadData() {
         if (!CONFIG.SHEET_CSV_URL) {
-          // Pakai mock data jika belum pasang Google Sheet
           this.transactions = MOCK_DATA;
           this.renderSummary();
           this.applyFilters();
@@ -346,9 +326,13 @@
         }
 
         try {
-          const res = await fetch(CONFIG.SHEET_CSV_URL);
+          // Tambahkan timestamp query parameter untuk menghindari cache browser
+          const cacheBuster = `&_t=${Date.now()}`;
+          const res = await fetch(CONFIG.SHEET_CSV_URL + cacheBuster);
           const csvText = await res.text();
-          this.transactions = this.parseCSV(csvText);
+          const parsed = this.parseCSV(csvText);
+
+          this.transactions = parsed.length > 0 ? parsed : MOCK_DATA;
           this.renderSummary();
           this.applyFilters();
         } catch (err) {
@@ -360,10 +344,10 @@
       }
 
       parseCSV(text) {
+        if (!text || typeof text !== "string") return [];
         const rows = text.trim().split("\n").map(r => r.split(","));
         if (rows.length <= 1) return [];
 
-        // Anggap baris 0 adalah Header: Timestamp, Tanggal, Deskripsi, Kategori, Tipe, Jumlah
         return rows.slice(1).map(col => ({
           tanggal: col[1]?.replace(/"/g, "").trim(),
           deskripsi: col[2]?.replace(/"/g, "").trim(),
@@ -373,7 +357,7 @@
         })).filter(item => item.deskripsi && item.jumlah > 0);
       }
 
-                  handleSubmitKas(e) {
+      handleSubmitKas(e) {
         e.preventDefault();
         const submitBtn = this.elements.btnSubmitKas;
         submitBtn.disabled = true;
@@ -387,7 +371,6 @@
         const kategori = document.getElementById("adm-cat").value;
         const jumlah = document.getElementById("adm-amount").value;
 
-        // Buat form temporer yang menembak langsung ke iframe
         const form = document.createElement("form");
         form.action = CONFIG.FORM_ACTION_URL;
         form.method = "POST";
@@ -413,39 +396,16 @@
         form.submit();
         document.body.removeChild(form);
 
-        // Feedback langsung ke bendahara
         setTimeout(() => {
-          alert("Transaksi berhasil dicatat ke Google Sheets!");
+          alert("Transaksi berhasil dikirim ke Google Form!");
           this.elements.formTransaksiAdmin.reset();
           this.elements.admDate.value = new Date().toISOString().split("T")[0];
           submitBtn.disabled = false;
           submitBtn.textContent = "Kirim Transaksi";
           
-          // Muat ulang data tabel
           this.loadData();
         }, 1500);
       }
-
-        } else {
-          // Fallback lokal
-          this.transactions.unshift({
-            tanggal: payload.tanggal,
-            deskripsi: payload.deskripsi,
-            kategori: payload.kategori,
-            tipe: rawType,
-            jumlah: Number(payload.jumlah)
-          });
-          this.renderSummary();
-          this.applyFilters();
-          alert("Transaksi berhasil ditambahkan (Mode Demo Lokal)!");
-          this.elements.formTransaksiAdmin.reset();
-          this.elements.admDate.value = new Date().toISOString().split("T")[0];
-        }
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Kirim Transaksi";
-      }
-
 
       renderSummary() {
         let masuk = 0;
